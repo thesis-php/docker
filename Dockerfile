@@ -10,15 +10,25 @@ RUN <<EOF
     groupadd --gid=${GID} app
     useradd --uid=${UID} --gid=${GID} --create-home --shell /bin/bash app
     apt-get update
-    apt-get install --no-install-recommends --no-install-suggests -q -y unzip tini
+    apt-get install --no-install-recommends --no-install-suggests -q --yes \
+        unzip \
+        tini
 EOF
 
 ARG EXTENSIONS=''
 
 RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bin/install-php-extensions,target=/usr/bin/install-extensions <<EOF
     set -e
-    install-extensions @composer opcache pcntl sockets bcmath intl uv ${EXTENSIONS}
-    apt-get remove -q -y ${PHPIZE_DEPS} ${BUILD_DEPENDS}
+    install-extensions \
+        @composer \
+        opcache \
+        pcntl \
+        sockets \
+        bcmath \
+        intl \
+        uv \
+        ${EXTENSIONS}
+    apt-get remove -q --yes $(echo "${PHPIZE_DEPS}" | sed 's/\bmake\b//') ${BUILD_DEPENDS}
     ln -s /usr/local/bin/composer /usr/local/bin/c
     mkdir /var/.composer
     chown app:app /var/.composer

@@ -43,7 +43,7 @@ USER app
 
 RUN <<EOF
     set -e
-    composer global config allow-plugins.infection/extension-installer true
+    composer global config allow-plugins.infection/extension-installer false
     composer global config allow-plugins.ergebnis/composer-normalize true
     composer global require --no-cache \
         friendsofphp/php-cs-fixer \

@@ -2,24 +2,20 @@ ARG PHP_VERSION=8.5
 
 FROM php:${PHP_VERSION}-cli-bookworm
 
-ARG UID=10001
-ARG GID=10001
-
 RUN <<EOF
-    set -e
-    groupadd --gid=${GID} app
-    useradd --gid=${GID} --uid=${UID} --shell /bin/bash app
+    set -eux
+    groupadd --gid=10001 dev
+    useradd --uid=10001 --gid=10001 --create-home dev
     apt-get update
     apt-get install --no-install-recommends --no-install-suggests -q --yes \
+        git \
         unzip \
         tini
 EOF
 
-ARG EXTENSIONS=''
-
-RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bin/install-php-extensions,target=/usr/bin/install-extensions <<EOF
-    set -e
-    install-extensions \
+RUN <<EOF
+    set -eux
+    (curl -sSLf https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - || echo 'return 1') | sh -s \
         @composer \
         opcache \
         pcntl \
@@ -27,22 +23,28 @@ RUN --mount=type=bind,from=mlocati/php-extension-installer:latest,source=/usr/bi
         bcmath \
         intl \
         uv \
-        pcov \
-        ${EXTENSIONS}
-    apt-get remove -q --yes $(echo "${PHPIZE_DEPS}" | sed 's/\bmake\b//') ${BUILD_DEPENDS}
+        pcov
+    apt-get remove -q --yes $(echo "${PHPIZE_DEPS}" | sed 's/\bmake\b//')
     ln -s /usr/local/bin/composer /usr/local/bin/c
     mkdir /composer
-    chown app:app /composer
+    chown dev:dev /composer
 EOF
 
 ENV COMPOSER_HOME=/composer
 ENV COMPOSER_CACHE_DIR=/dev/null
 ENV PATH="/composer/vendor/bin:${PATH}"
 
-USER app
+USER dev
 
 RUN <<EOF
-    set -e
+    set -eux
+    echo '.idea/' >> '/home/dev/.gitignore'
+    echo '/.playground/' >> '/home/dev/.gitignore'
+    git config --global core.excludesFile '/home/dev/.gitignore'
+EOF
+
+RUN <<EOF
+    set -eux
     composer global config allow-plugins.infection/extension-installer false
     composer global config allow-plugins.ergebnis/composer-normalize true
     composer global require --no-cache \

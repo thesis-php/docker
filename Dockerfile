@@ -2,10 +2,13 @@ ARG PHP_VERSION=8.5
 
 FROM php:${PHP_VERSION}-cli-bookworm
 
+ENV UID=10001
+ENV GID=10001
+
 RUN <<EOF
     set -eux
-    groupadd --gid=10001 dev
-    useradd --uid=10001 --gid=10001 --create-home dev
+    groupadd --gid=${GID} dev
+    useradd --uid=${UID} --gid=${GID} --create-home dev
     apt-get update
     apt-get install --no-install-recommends --no-install-suggests -q --yes \
         git \

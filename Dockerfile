@@ -14,8 +14,7 @@ RUN <<EOF
     apt-get update
     apt-get install --no-install-recommends --no-install-suggests -q --yes \
         git \
-        unzip \
-        tini
+        unzip
     (curl -sSLf https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - || echo 'return 1') | sh -s \
         @composer \
         opcache \
@@ -59,5 +58,3 @@ RUN --mount=type=cache,target=/composer/cache,uid=${UID},gid=${GID} <<EOF
         ergebnis/composer-normalize \
         infection/infection
 EOF
-
-ENTRYPOINT ["tini", "--"]

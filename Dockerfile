@@ -5,6 +5,8 @@ FROM php:${PHP_VERSION}-cli-bookworm
 ENV UID=10001
 ENV GID=10001
 
+ENV LC_ALL=C.UTF-8
+
 RUN <<EOF
     set -eux
     groupadd --gid=${GID} dev

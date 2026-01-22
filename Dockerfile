@@ -16,10 +16,6 @@ RUN <<EOF
         git \
         unzip \
         tini
-EOF
-
-RUN <<EOF
-    set -eux
     (curl -sSLf https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - || echo 'return 1') | sh -s \
         @composer \
         opcache \
@@ -29,7 +25,7 @@ RUN <<EOF
         intl \
         uv \
         pcov
-    apt-get remove -q --yes $(echo "${PHPIZE_DEPS}" | sed 's/\bmake\b//')
+    apt-get purge -q --yes $(echo "${PHPIZE_DEPS}" | sed 's/\bmake\b//')
     ln -s /usr/local/bin/composer /usr/local/bin/c
     mkdir /composer
     chown dev:dev /composer
